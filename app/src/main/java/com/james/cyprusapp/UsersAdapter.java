@@ -3,13 +3,13 @@ package com.james.cyprusapp;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v4.widget.CursorAdapter;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by fappsilya on 13.10.15.
@@ -26,9 +26,14 @@ public class UsersAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        TextView textViewTitle = (TextView) view.findViewById(R.id.id);
-        String title = cursor.getString( cursor.getColumnIndex(MyDBHElper.COLUMN_ID) );
-        textViewTitle.setText(title);
+
+        TextView mName = (TextView) view.findViewById(R.id.name);
+        String name = cursor.getString( cursor.getColumnIndex(MyDBHElper.COLUMN_NAME) );
+        mName.setText(name);
+
+        CircleImageView mPhoto = (CircleImageView) view.findViewById(R.id.profile_image);
+        String image = cursor.getString(cursor.getColumnIndex(MyDBHElper.COLUMN_PHOTO));
+        mPhoto.setImageBitmap(MainActivity.setImageInImageView(image));
     }
 
     @Override

@@ -1,4 +1,18 @@
 apply plugin: 'com.android.application'
+apply plugin: 'me.tatarka.retrolambda'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'me.tatarka:gradle-retrolambda:3.2.2'
+    }
+}
+repositories {
+    mavenCentral()
+}
+
 
 android {
     compileSdkVersion 23
@@ -17,6 +31,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+retrolambda {
+    jdk "/usr/lib/jvm/java-8-oracle"
+    javaVersion JavaVersion.VERSION_1_7
 }
 
 dependencies {
@@ -25,5 +49,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.0.1'
     compile 'com.android.support:design:23.0.1'
     compile 'com.jakewharton:butterknife:7.0.1'
-    compile 'com.android.support:recyclerview-v7:23.0.1'
+    compile 'de.hdodenhof:circleimageview:2.0.0'
+    compile 'io.reactivex:rxandroid:1.0.1'
+
 }

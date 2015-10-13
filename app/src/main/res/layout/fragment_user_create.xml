@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/profile_image"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:src="@drawable/add_user"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        app:civ_border_width="2dp"
+        app:civ_border_color="#FF000000"/>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:id="@+id/name">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:hint="@string/name"
+            android:inputType="text"
+            android:textColor="@color/black"
+            android:layout_height="wrap_content" />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:id="@+id/age">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:hint="@string/age"
+            android:inputType="number"
+            android:textColor="@color/black"
+            android:layout_height="wrap_content" />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <Button
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="@string/create"
+        android:layout_gravity="center"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/selector_bnt"
+        android:id="@+id/create_btn"/>
+
+    <Button
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="@string/delete_btn"
+        android:visibility="gone"
+        android:layout_gravity="center"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/selector_bnt"
+        android:id="@+id/delete_btn"/>
+
+</LinearLayout>

@@ -1,9 +1,12 @@
 package com.james.cyprusapp;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by fappsilya on 13.10.15.
  */
-public class User {
+public class User implements Parcelable {
     private long id;
     private String name;
     private String photo;
@@ -13,12 +16,24 @@ public class User {
 
     }
 
-
-    public User(long id, String name, String photo){
-        this.id = id;
-        this.name = name;
-        this.photo = photo;
+    protected User(Parcel in) {
+        id = in.readLong();
+        name = in.readString();
+        photo = in.readString();
+        age = in.readInt();
     }
+
+    public static final Creator<User> CREATOR = new Creator<User>() {
+        @Override
+        public User createFromParcel(Parcel in) {
+            return new User(in);
+        }
+
+        @Override
+        public User[] newArray(int size) {
+            return new User[size];
+        }
+    };
 
     public String getName() {
         return name;
@@ -50,5 +65,19 @@ public class User {
 
     public void setAge(int age) {
         this.age = age;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(id);
+        dest.writeString(name);
+        dest.writeString(photo);
+        dest.writeInt(age);
+
     }
 }

@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">CyprusApp</string>
+    <string name="age">Введите возраст</string>
+    <string name="name">Введите имя</string>
+    <string name="create">Создать</string>
+    <string name="input_age">Введите возраст</string>
+    <string name="input_name">Введите имя</string>
+    <string name="delete_btn">Удалить</string>
+    <string name="no_photo">Фотография не выбрана</string>
 </resources>

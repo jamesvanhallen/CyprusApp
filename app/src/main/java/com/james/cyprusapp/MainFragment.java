@@ -8,8 +8,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.SimpleCursorAdapter;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +17,7 @@ import android.widget.ListView;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Created by fappsilya on 13.10.15.
@@ -34,17 +33,15 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
         ButterKnife.bind(this, v);
-        ContentValues cv = new ContentValues();
-        for (int i = 1; i <= 3; i++) {
-            cv.put(MyDBHElper.COLUMN_NAME, "name " + i);
-            cv.put(MyDBHElper.COLUMN_AGE, i);
-            cv.put(MyDBHElper.COLUMN_PHOTO, "photo " + i);
-            getActivity().getContentResolver().insert(MyContentProvider.CONTENT_ADDRESS_URI, cv);
-        }
+
         mLv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.d("DSA", "_id " + adapter.getItem(position).getId());
+                UserCreateFragment fragment = new UserCreateFragment();
+                Bundle b = new Bundle();
+                b.putParcelable("user", adapter.getItem(position));
+                fragment.setArguments(b);
+                MainActivity.changeFragment(fragment, true, getActivity(), MainActivity.container);
             }
         });
 
@@ -54,6 +51,11 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
         getActivity().getSupportLoaderManager().initLoader(0, null, this);
         return  v;
+    }
+
+    @OnClick(R.id.fabButton)
+    void onFabButtonClick(){
+        MainActivity.changeFragment(new UserCreateFragment(), true, getActivity(), MainActivity.container);
     }
 
     @Override

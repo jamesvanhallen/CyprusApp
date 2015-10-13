@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
+    public static int container = R.id.container;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
                 finish();
             }
         });
+
+        changeFragment(new MainFragment(), false, this, container);
     }
 
     public static void changeFragment(Fragment f, boolean addToBackStack, Activity activity, Integer fragContainer) {

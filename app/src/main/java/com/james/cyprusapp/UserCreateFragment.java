@@ -2,6 +2,7 @@ package com.james.cyprusapp;
 
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -179,14 +180,16 @@ public class UserCreateFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == REQUEST_CAMERA) {
+                imagePath = getImagePath(data.getData(), getContext());
                 Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+                if(imagePath != null){
+                    thumbnail = MainActivity.rotateBitmap(thumbnail, imagePath);
+                }
                 ByteArrayOutputStream bytes = new ByteArrayOutputStream();
                 thumbnail.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
 
                 File destination = new File(Environment.getExternalStorageDirectory(),
                         System.currentTimeMillis() + ".jpg");
-                imagePath = destination.getPath();
-
                 FileOutputStream fo;
                 try {
                     destination.createNewFile();
@@ -196,31 +199,32 @@ public class UserCreateFragment extends Fragment {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
                 mProfilePhoto.setImageBitmap(thumbnail);
 
             } else if (requestCode == SELECT_FILE) {
                 Uri selectedImageUri = data.getData();
-                imagePath = getRealPathFromURI(selectedImageUri);
+                imagePath = getImagePath(selectedImageUri, getContext());
                 Bitmap bm = MainActivity.setImageInImageView(imagePath);
                 mProfilePhoto.setImageBitmap(bm);
             }
         }
     }
 
-    public String getRealPathFromURI(Uri contentUri){
-        try
-        {
-            String[] proj = {MediaStore.Images.Media.DATA};
-            Cursor cursor = getActivity().managedQuery(contentUri, proj, null, null, null);
-            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        }
-        catch (Exception e)
-        {
-            return contentUri.getPath();
-        }
+    public static String getImagePath(Uri uri, Context context){
+        Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+        cursor.moveToFirst();
+        String document_id = cursor.getString(0);
+        document_id = document_id.substring(document_id.lastIndexOf(":")+1);
+        cursor.close();
+
+        cursor =  context.getContentResolver().query(
+                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                null, MediaStore.Images.Media._ID + " = ? ", new String[]{document_id}, null);
+        cursor.moveToFirst();
+        String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+        cursor.close();
+
+        return path;
     }
 
     @Override

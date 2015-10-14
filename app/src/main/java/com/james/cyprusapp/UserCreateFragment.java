@@ -22,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -144,7 +145,15 @@ public class UserCreateFragment extends Fragment {
 
     public void finishRedact(){
         Log.d("ART", "onCompl");
-        getActivity().getSupportFragmentManager().popBackStack();
+        FrameLayout container = (FrameLayout) getActivity().findViewById(R.id.container2);
+        if(container!=null){
+            //MianchangeFragment(new EmptyFragment(),false, this, R.id.container2);
+            MainFragment frag = (MainFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.container);
+            frag.startLoading();
+            MainActivity.changeFragment(new EmptyFragment(), false, getActivity(), R.id.container2);
+        } else {
+            getActivity().getSupportFragmentManager().popBackStack();
+        }
     }
 
     @OnClick(R.id.profile_image)
@@ -180,17 +189,21 @@ public class UserCreateFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == REQUEST_CAMERA) {
-                imagePath = getImagePath(data.getData(), getContext());
                 Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
-                if(imagePath != null){
+                File destination = new File(Environment.getExternalStorageDirectory(),
+                        System.currentTimeMillis() + ".jpg");
+                FileOutputStream fo;
+                Uri selectedUri = data.getData();
+                if(selectedUri != null){
+                    imagePath = getImagePath(data.getData(), getContext());
                     thumbnail = MainActivity.rotateBitmap(thumbnail, imagePath);
+                }  else {
+                    imagePath = destination.getPath();
                 }
                 ByteArrayOutputStream bytes = new ByteArrayOutputStream();
                 thumbnail.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
 
-                File destination = new File(Environment.getExternalStorageDirectory(),
-                        System.currentTimeMillis() + ".jpg");
-                FileOutputStream fo;
+
                 try {
                     destination.createNewFile();
                     fo = new FileOutputStream(destination);

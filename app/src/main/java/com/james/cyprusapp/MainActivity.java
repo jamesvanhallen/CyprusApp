@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -13,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 
 import java.io.IOException;
 
@@ -22,23 +24,26 @@ import butterknife.ButterKnife;
 /**
  * Created by fappsilya on 23.07.15.
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
     public static int container = R.id.container;
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
+        if(savedInstanceState!=null){
+            user = savedInstanceState.getParcelable("user");
+        }
         //toolbar.setNavigationIcon(ContextCompat.getDrawable(this, R.drawable.back_arrow));
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("MyExpandableRecyclerView");
+        getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -50,6 +55,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        FrameLayout container2 = (FrameLayout) findViewById(R.id.container2);
+        if(container2!=null){
+            if(savedInstanceState!=null&&savedInstanceState.getParcelable("user")!=null){
+                UserCreateFragment fragment = new UserCreateFragment();
+                Bundle b = new Bundle();
+                b.putParcelable("user", savedInstanceState.getParcelable("user"));
+                fragment.setArguments(b);
+                changeFragment(fragment, false, this, R.id.container2);
+            } else {
+                changeFragment(new EmptyFragment(), false, this, R.id.container2);
+            }
+        }
         changeFragment(new MainFragment(), false, this, container);
     }
 
@@ -116,4 +133,22 @@ public class MainActivity extends AppCompatActivity {
         }
         return newBitmap;
     }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        if(getSupportFragmentManager().findFragmentById(R.id.container2)!=null){
+            MainFragment frag = (MainFragment) getSupportFragmentManager().findFragmentById(R.id.container);
+            if(frag.getUser()!=null){
+                user = frag.getUser();
+            }
+            if(user!=null){
+                outState.putParcelable("user", user);
+            }
+        }
+        super.onSaveInstanceState(outState);
+    }
+
+
+
 }

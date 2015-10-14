@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 
 import butterknife.Bind;
@@ -27,6 +28,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     @Bind(R.id.lv)
     ListView mLv;
     private UsersAdapter adapter;
+    private User mUser;
 
     @Nullable
     @Override
@@ -39,9 +41,15 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 UserCreateFragment fragment = new UserCreateFragment();
                 Bundle b = new Bundle();
-                b.putParcelable("user", adapter.getItem(position));
+                mUser = adapter.getItem(position);
+                b.putParcelable("user", mUser);
                 fragment.setArguments(b);
-                MainActivity.changeFragment(fragment, true, getActivity(), MainActivity.container);
+                FrameLayout container2 = (FrameLayout) getActivity().findViewById(R.id.container2);
+                if(container2!=null){
+                    MainActivity.changeFragment(fragment, false, getActivity(), R.id.container2);
+                } else {
+                    MainActivity.changeFragment(fragment, true, getActivity(), R.id.container);
+                }
             }
         });
 
@@ -49,13 +57,23 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
         mLv.setAdapter(adapter);
 
 
-        getActivity().getSupportLoaderManager().initLoader(0, null, this);
+        startLoading();
         return  v;
+    }
+
+    public void startLoading() {
+
+        getActivity().getSupportLoaderManager().initLoader(0, null, this);
     }
 
     @OnClick(R.id.fabButton)
     void onFabButtonClick(){
-        MainActivity.changeFragment(new UserCreateFragment(), true, getActivity(), MainActivity.container);
+        FrameLayout container2 = (FrameLayout) getActivity().findViewById(R.id.container2);
+        if(container2!=null){
+            MainActivity.changeFragment(new UserCreateFragment(),false, getActivity(), R.id.container2);
+        } else {
+            MainActivity.changeFragment(new UserCreateFragment(), true, getActivity(), R.id.container);
+        }
     }
 
     @Override
@@ -78,4 +96,10 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onLoaderReset(Loader<Cursor> loader) {
         adapter.swapCursor(null);
     }
+
+    public User getUser() {
+        return mUser;
+    }
+
+
 }

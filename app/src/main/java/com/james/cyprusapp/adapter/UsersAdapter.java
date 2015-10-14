@@ -1,4 +1,4 @@
-package com.james.cyprusapp;
+package com.james.cyprusapp.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -8,6 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.james.cyprusapp.database.MyDBHElper;
+import com.james.cyprusapp.R;
+import com.james.cyprusapp.pojo.User;
+import com.james.cyprusapp.display.MainActivity;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -33,7 +38,7 @@ public class UsersAdapter extends CursorAdapter {
 
         CircleImageView mPhoto = (CircleImageView) view.findViewById(R.id.profile_image);
         String image = cursor.getString(cursor.getColumnIndex(MyDBHElper.COLUMN_PHOTO));
-        mPhoto.setImageBitmap(MainActivity.setImageInImageView(image));
+        mPhoto.setImageBitmap(((MainActivity) context).setImageInImageView(image));
     }
 
     @Override

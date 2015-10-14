@@ -1,4 +1,4 @@
-package com.james.cyprusapp;
+package com.james.cyprusapp.database;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;

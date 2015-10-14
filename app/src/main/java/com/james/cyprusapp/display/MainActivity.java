@@ -1,12 +1,10 @@
-package com.james.cyprusapp;
+package com.james.cyprusapp.display;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -15,6 +13,9 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
+
+import com.james.cyprusapp.R;
+import com.james.cyprusapp.pojo.User;
 
 import java.io.IOException;
 
@@ -28,7 +29,6 @@ public class MainActivity extends AppCompatActivity{
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
-    public static int container = R.id.container;
     private User user;
 
     @Override
@@ -62,16 +62,16 @@ public class MainActivity extends AppCompatActivity{
                 Bundle b = new Bundle();
                 b.putParcelable("user", savedInstanceState.getParcelable("user"));
                 fragment.setArguments(b);
-                changeFragment(fragment, false, this, R.id.container2);
+                changeFragment(fragment, false, R.id.container2);
             } else {
-                changeFragment(new EmptyFragment(), false, this, R.id.container2);
+                changeFragment(new EmptyFragment(), false, R.id.container2);
             }
         }
-        changeFragment(new MainFragment(), false, this, container);
+        changeFragment(new MainFragment(), false, R.id.container);
     }
 
-    public static void changeFragment(Fragment f, boolean addToBackStack, Activity activity, Integer fragContainer) {
-        FragmentManager mFm = ((AppCompatActivity)activity).getSupportFragmentManager();
+    public void changeFragment(Fragment f, boolean addToBackStack, Integer fragContainer) {
+        FragmentManager mFm = getSupportFragmentManager();
         FragmentTransaction ft = mFm.beginTransaction();
 
         if (addToBackStack) {
@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity{
         ft.commit();
     }
 
-    public static Bitmap setImageInImageView(String imagePath) {
+    public Bitmap setImageInImageView(String imagePath) {
         Bitmap bm;
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity{
         return rotateBitmap(bm, imagePath);
     }
 
-    public static Bitmap rotateBitmap(Bitmap newBitmap, String path) {
+    public Bitmap rotateBitmap(Bitmap newBitmap, String path) {
         try {
             ExifInterface ei = new ExifInterface(path);
 

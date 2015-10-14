@@ -1,6 +1,5 @@
-package com.james.cyprusapp;
+package com.james.cyprusapp.display;
 
-import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -8,13 +7,17 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
+
+import com.james.cyprusapp.database.MyContentProvider;
+import com.james.cyprusapp.R;
+import com.james.cyprusapp.pojo.User;
+import com.james.cyprusapp.adapter.UsersAdapter;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -46,9 +49,9 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
                 fragment.setArguments(b);
                 FrameLayout container2 = (FrameLayout) getActivity().findViewById(R.id.container2);
                 if(container2!=null){
-                    MainActivity.changeFragment(fragment, false, getActivity(), R.id.container2);
+                    ((MainActivity)getActivity()).changeFragment(fragment, false, R.id.container2);
                 } else {
-                    MainActivity.changeFragment(fragment, true, getActivity(), R.id.container);
+                    ((MainActivity)getActivity()).changeFragment(fragment, true,  R.id.container);
                 }
             }
         });
@@ -70,9 +73,9 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     void onFabButtonClick(){
         FrameLayout container2 = (FrameLayout) getActivity().findViewById(R.id.container2);
         if(container2!=null){
-            MainActivity.changeFragment(new UserCreateFragment(),false, getActivity(), R.id.container2);
+            ((MainActivity)getActivity()).changeFragment(new UserCreateFragment(), false, R.id.container2);
         } else {
-            MainActivity.changeFragment(new UserCreateFragment(), true, getActivity(), R.id.container);
+            ((MainActivity)getActivity()).changeFragment(new UserCreateFragment(), true, R.id.container);
         }
     }
 
@@ -80,11 +83,11 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(
                 getActivity(),
-                MyContentProvider.CONTENT_ADDRESS_URI, //uri для таблицы Classes
-                null, //список столбцов, которые должны присутствовать в выборке
-                null, // условие WHERE для выборки
-                null, // аргументы для условия WHERE
-                null); // порядок сортировки
+                MyContentProvider.CONTENT_ADDRESS_URI,
+                null,
+                null,
+                null,
+                null);
     }
 
     @Override
@@ -101,5 +104,9 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
         return mUser;
     }
 
-
+    @Override
+    public void onDestroyView() {
+        ButterKnife.unbind(this);
+        super.onDestroyView();
+    }
 }

@@ -1,4 +1,4 @@
-package com.james.cyprusapp;
+package com.james.cyprusapp.display;
 
 import android.app.Activity;
 import android.content.ContentValues;
@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -24,9 +23,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
+import com.james.cyprusapp.database.MyContentProvider;
+import com.james.cyprusapp.database.MyDBHElper;
+import com.james.cyprusapp.R;
+import com.james.cyprusapp.pojo.User;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -35,6 +38,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
@@ -55,12 +59,10 @@ public class UserCreateFragment extends Fragment {
     CircleImageView mProfilePhoto;
 
     private View v;
-    private Observable<User> mCreateObservable;
-    private Observable<Long> mDeleteObservable;
     private long id = -1;
     public static  final int SELECT_FILE = 112;
     public static  final int REQUEST_CAMERA = 113;
-
+    private Subscription mSubscription;
     private String imagePath = "";
 
 
@@ -76,7 +78,7 @@ public class UserCreateFragment extends Fragment {
             id = user.getId();
             imagePath = user.getPhoto();
             mCreateBtn.setText("Изменить");
-            mProfilePhoto.setImageBitmap(MainActivity.setImageInImageView(imagePath));
+            mProfilePhoto.setImageBitmap(((MainActivity) getActivity()).setImageInImageView(imagePath));
             mDeleteBtn.setVisibility(View.VISIBLE);
         }
 
@@ -88,17 +90,18 @@ public class UserCreateFragment extends Fragment {
         final String name = mName.getEditText().getText().toString().trim();
         final String age = mAge.getEditText().getText().toString().trim();
         boolean validator = true;
+        String error = "";
         if("".equals(name)){
             validator = false;
-            Snackbar.make(v, R.string.input_name, Snackbar.LENGTH_SHORT).show();
+            error = getResources().getString(R.string.input_name);
         }
         if("".equals(age)){
             validator = false;
-            Snackbar.make(v, R.string.input_age, Snackbar.LENGTH_SHORT).show();
+            error = getResources().getString(R.string.input_age);
         }
         if("".equals(imagePath)){
             validator = false;
-            Snackbar.make(v, R.string.no_photo, Snackbar.LENGTH_SHORT).show();
+            error = getResources().getString(R.string.no_photo);
         }
         if (validator){
             User user = new User();
@@ -106,20 +109,26 @@ public class UserCreateFragment extends Fragment {
             user.setAge(Integer.valueOf(age));
             user.setId(id);
             user.setPhoto(imagePath);
-            mCreateObservable = Observable.just(user);
-            mCreateObservable.subscribeOn(Schedulers.io())
+            Observable<User> mCreateObservable = Observable.just(user);
+            mSubscription = mCreateObservable.subscribeOn(Schedulers.io())
                        .observeOn(AndroidSchedulers.mainThread())
                        .subscribe(UserCreateFragment.this::saveInDB,
                                Throwable::printStackTrace,
                                UserCreateFragment.this::finishRedact);
 
+        } else {
+            AlertDialog.Builder alb = new AlertDialog.Builder(getActivity());
+            alb.setMessage(error)
+                .setPositiveButton("Ок", null)
+                .create()
+                .show();
         }
     }
 
     @OnClick(R.id.delete_btn)
     void onDeleteBtnClick(){
-        mDeleteObservable = Observable.just(id);
-        mDeleteObservable.subscribeOn(Schedulers.io())
+        Observable<Long> mDeleteObservable = Observable.just(id);
+        mSubscription = mDeleteObservable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(UserCreateFragment.this::removeFromDB,
                         Throwable::printStackTrace,
@@ -144,13 +153,11 @@ public class UserCreateFragment extends Fragment {
     }
 
     public void finishRedact(){
-        Log.d("ART", "onCompl");
         FrameLayout container = (FrameLayout) getActivity().findViewById(R.id.container2);
         if(container!=null){
-            //MianchangeFragment(new EmptyFragment(),false, this, R.id.container2);
             MainFragment frag = (MainFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.container);
             frag.startLoading();
-            MainActivity.changeFragment(new EmptyFragment(), false, getActivity(), R.id.container2);
+            ((MainActivity)getActivity()).changeFragment(new EmptyFragment(), false, R.id.container2);
         } else {
             getActivity().getSupportFragmentManager().popBackStack();
         }
@@ -161,7 +168,6 @@ public class UserCreateFragment extends Fragment {
         final CharSequence[] items = { "Камера", "Галерея", "Назад" };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Добавить фото!");
         builder.setItems(items, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int item) {
@@ -196,7 +202,7 @@ public class UserCreateFragment extends Fragment {
                 Uri selectedUri = data.getData();
                 if(selectedUri != null){
                     imagePath = getImagePath(data.getData(), getContext());
-                    thumbnail = MainActivity.rotateBitmap(thumbnail, imagePath);
+                    thumbnail = ((MainActivity) getActivity()).rotateBitmap(thumbnail, imagePath);
                 }  else {
                     imagePath = destination.getPath();
                 }
@@ -217,7 +223,7 @@ public class UserCreateFragment extends Fragment {
             } else if (requestCode == SELECT_FILE) {
                 Uri selectedImageUri = data.getData();
                 imagePath = getImagePath(selectedImageUri, getContext());
-                Bitmap bm = MainActivity.setImageInImageView(imagePath);
+                Bitmap bm = ((MainActivity) getActivity()).setImageInImageView(imagePath);
                 mProfilePhoto.setImageBitmap(bm);
             }
         }
@@ -248,13 +254,9 @@ public class UserCreateFragment extends Fragment {
 
     @Override
     public void onDestroy() {
-        if (mCreateObservable != null){
-            mCreateObservable.unsubscribeOn(Schedulers.io());
-            mCreateObservable = null;
-        }
-        if(mDeleteObservable != null){
-            mDeleteObservable.unsubscribeOn(Schedulers.io());
-            mDeleteObservable = null;
+        if (mSubscription != null) {
+            mSubscription.unsubscribe();
+            mSubscription = null;
         }
         super.onDestroy();
     }

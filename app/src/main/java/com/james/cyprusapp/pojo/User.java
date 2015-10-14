@@ -1,4 +1,4 @@
-package com.james.cyprusapp;
+package com.james.cyprusapp.pojo;
 
 import android.os.Parcel;
 import android.os.Parcelable;

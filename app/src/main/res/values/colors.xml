@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
-    <color name="foreground_material_light">#040000</color>
-    <color name="statusBarColor">#2e2e30</color>
-    <item name="pink" type="color">#D566B5</item>
-    <item name="pink_dark" type="color">#A34384</item>
-    <item name="black_transparet" type="color">#4D000000</item>
+    <color name="colorPrimary">#FF689A92</color>
+    <color name="colorPrimaryDark">#FF345953</color>
+    <color name="colorAccent">#58857e</color>
+    <color name="statusBarColor">#2e2e30</color>>
     <item name="black" type="color">#1a1a1a</item>
     <item name="white" type="color">#FAFAFA</item>
     <item name="dark_gray" type="color">#646464</item>
-    <item name="green" type="color">#FF6BFF34</item>
-    <item name="yellow" type="color">#FFFFE71C</item>
-    <item name="gray" type="color">#DFDFDF</item>
-    <item name="light_gray" type="color">#F2F2F2</item>
+    <item name="gray" type="color">#CCCCCC</item>
 </resources>

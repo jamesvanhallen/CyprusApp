@@ -2,6 +2,8 @@ package com.james.cyprusapp.adapter;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v4.widget.CursorAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,6 +17,10 @@ import com.james.cyprusapp.pojo.User;
 import com.james.cyprusapp.display.MainActivity;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by fappsilya on 13.10.15.
@@ -38,7 +44,10 @@ public class UsersAdapter extends CursorAdapter {
 
         CircleImageView mPhoto = (CircleImageView) view.findViewById(R.id.profile_image);
         String image = cursor.getString(cursor.getColumnIndex(MyDBHElper.COLUMN_PHOTO));
-        mPhoto.setImageBitmap(((MainActivity) context).setImageInImageView(image));
+        ((MainActivity)context).getBitmap(image)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(mPhoto::setImageBitmap);
     }
 
     @Override

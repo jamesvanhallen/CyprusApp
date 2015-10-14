@@ -15,6 +15,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.CursorLoader;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -58,18 +59,18 @@ public class UserCreateFragment extends Fragment {
     @Bind(R.id.profile_image)
     CircleImageView mProfilePhoto;
 
-    private View v;
     private long id = -1;
     public static  final int SELECT_FILE = 112;
     public static  final int REQUEST_CAMERA = 113;
     private Subscription mSubscription;
     private String imagePath = "";
+    private static final String TAG = "UserCreateFragment";
 
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        v = inflater.inflate(R.layout.fragment_user_create, container, false);
+        View v = inflater.inflate(R.layout.fragment_user_create, container, false);
         ButterKnife.bind(this, v);
         if(getArguments()!=null){
             User user = getArguments().getParcelable("user");
@@ -78,11 +79,14 @@ public class UserCreateFragment extends Fragment {
             id = user.getId();
             imagePath = user.getPhoto();
             mCreateBtn.setText("Изменить");
-            mProfilePhoto.setImageBitmap(((MainActivity) getActivity()).setImageInImageView(imagePath));
             mDeleteBtn.setVisibility(View.VISIBLE);
+            ((MainActivity)getActivity()).getBitmap(imagePath)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(mProfilePhoto::setImageBitmap);
         }
 
-        return  v;
+        return v;
     }
 
     @OnClick(R.id.create_btn)
@@ -168,23 +172,20 @@ public class UserCreateFragment extends Fragment {
         final CharSequence[] items = { "Камера", "Галерея", "Назад" };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setItems(items, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int item) {
-                if ("Камера".equals(items[item])) {
-                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    startActivityForResult(intent, REQUEST_CAMERA);
-                } else if ("Галерея".equals(items[item])) {
-                    Intent intent = new Intent(
-                            Intent.ACTION_PICK,
-                            android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                    intent.setType("image/*");
-                    startActivityForResult(
-                            Intent.createChooser(intent, "Select File"),
-                            SELECT_FILE);
-                } else if ("Назад".equals(items[item])) {
-                    dialog.dismiss();
-                }
+        builder.setItems(items, (dialog, item) -> {
+            if ("Камера".equals(items[item])) {
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(intent, REQUEST_CAMERA);
+            } else if ("Галерея".equals(items[item])) {
+                Intent intent = new Intent(
+                        Intent.ACTION_PICK,
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                intent.setType("image/*");
+                startActivityForResult(
+                        Intent.createChooser(intent, "Select File"),
+                        SELECT_FILE);
+            } else if ("Назад".equals(items[item])) {
+                dialog.dismiss();
             }
         });
         builder.show();
@@ -195,55 +196,50 @@ public class UserCreateFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == REQUEST_CAMERA) {
-                Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
-                File destination = new File(Environment.getExternalStorageDirectory(),
-                        System.currentTimeMillis() + ".jpg");
-                FileOutputStream fo;
                 Uri selectedUri = data.getData();
                 if(selectedUri != null){
+                    Log.d(TAG, "uri != null");
                     imagePath = getImagePath(data.getData(), getContext());
-                    thumbnail = ((MainActivity) getActivity()).rotateBitmap(thumbnail, imagePath);
-                }  else {
+                }
+                else {
+                    Log.d(TAG, "uri == null");
+                    Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+                    File destination = new File(Environment.getExternalStorageDirectory(),
+                            System.currentTimeMillis() + ".jpg");
+                    FileOutputStream fo;
+                    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+                    thumbnail.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
+                    try {
+                        destination.createNewFile();
+                        fo = new FileOutputStream(destination);
+                        fo.write(bytes.toByteArray());
+                        fo.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     imagePath = destination.getPath();
                 }
-                ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-                thumbnail.compress(Bitmap.CompressFormat.JPEG, 90, bytes);
-
-
-                try {
-                    destination.createNewFile();
-                    fo = new FileOutputStream(destination);
-                    fo.write(bytes.toByteArray());
-                    fo.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                mProfilePhoto.setImageBitmap(thumbnail);
 
             } else if (requestCode == SELECT_FILE) {
                 Uri selectedImageUri = data.getData();
                 imagePath = getImagePath(selectedImageUri, getContext());
-                Bitmap bm = ((MainActivity) getActivity()).setImageInImageView(imagePath);
-                mProfilePhoto.setImageBitmap(bm);
             }
+            ((MainActivity)getActivity()).getBitmap(imagePath)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(mProfilePhoto::setImageBitmap);
         }
     }
 
     public static String getImagePath(Uri uri, Context context){
-        Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+        String[] proj = { MediaStore.Images.Media.DATA };
+        CursorLoader loader = new CursorLoader(context, uri, proj, null, null, null);
+        Cursor cursor = loader.loadInBackground();
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
         cursor.moveToFirst();
-        String document_id = cursor.getString(0);
-        document_id = document_id.substring(document_id.lastIndexOf(":")+1);
+        String result = cursor.getString(column_index);
         cursor.close();
-
-        cursor =  context.getContentResolver().query(
-                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                null, MediaStore.Images.Media._ID + " = ? ", new String[]{document_id}, null);
-        cursor.moveToFirst();
-        String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
-        cursor.close();
-
-        return path;
+        return result;
     }
 
     @Override

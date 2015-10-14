@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import rx.Observable;
 
 /**
  * Created by fappsilya on 23.07.15.
@@ -86,7 +87,14 @@ public class MainActivity extends AppCompatActivity{
         ft.commit();
     }
 
-    public Bitmap setImageInImageView(String imagePath) {
+    public Observable<Bitmap> getBitmap(String icon) {
+        return Observable.create(subscriber -> {
+            subscriber.onNext(createBitmap(icon));
+            subscriber.onCompleted();
+        });
+    }
+
+    public Bitmap createBitmap(String imagePath) {
         Bitmap bm;
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
@@ -98,8 +106,8 @@ public class MainActivity extends AppCompatActivity{
             scale *= 2;
         options.inSampleSize = scale;
         options.inJustDecodeBounds = false;
-        bm = BitmapFactory.decodeFile(imagePath, options);
-        return rotateBitmap(bm, imagePath);
+        bm = rotateBitmap(BitmapFactory.decodeFile(imagePath, options), imagePath);
+        return bm;
     }
 
     public Bitmap rotateBitmap(Bitmap newBitmap, String path) {

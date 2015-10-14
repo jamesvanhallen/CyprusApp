@@ -1,5 +1,7 @@
 package com.james.cyprusapp.display;
 
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -7,9 +9,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
@@ -18,6 +22,8 @@ import com.james.cyprusapp.database.MyContentProvider;
 import com.james.cyprusapp.R;
 import com.james.cyprusapp.pojo.User;
 import com.james.cyprusapp.adapter.UsersAdapter;
+
+import java.util.zip.Inflater;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -32,12 +38,14 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     ListView mLv;
     private UsersAdapter adapter;
     private User mUser;
+    private LayoutInflater mInflater;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
         ButterKnife.bind(this, v);
+        mInflater = inflater;
 
         mLv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -65,17 +73,19 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     public void startLoading() {
-
         getActivity().getSupportLoaderManager().initLoader(0, null, this);
     }
 
     @OnClick(R.id.fabButton)
     void onFabButtonClick(){
+        //DialogFragment fragment = new DialogFragment();
         FrameLayout container2 = (FrameLayout) getActivity().findViewById(R.id.container2);
         if(container2!=null){
-            ((MainActivity)getActivity()).changeFragment(new UserCreateFragment(), false, R.id.container2);
+            MyDialog dialog = new MyDialog();
+            dialog.show(getActivity().getSupportFragmentManager(), " dfd");
         } else {
             ((MainActivity)getActivity()).changeFragment(new UserCreateFragment(), true, R.id.container);
+
         }
     }
 

@@ -39,7 +39,7 @@ android {
 }
 
 retrolambda {
-    jdk "/Library/Java/JavaVirtualMachines/jdk1.8.0_40.jdk/Contents/Home"
+    jdk "/usr/lib/jvm/java-8-oracle"
     javaVersion JavaVersion.VERSION_1_7
 }
 

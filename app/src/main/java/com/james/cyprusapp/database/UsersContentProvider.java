@@ -11,7 +11,7 @@ import android.net.Uri;
 /**
  * Created by fappsilya on 13.10.15.
  */
-public class MyContentProvider extends ContentProvider {
+public class UsersContentProvider extends ContentProvider {
     private static final String AUTHORITY = "com.james.cyprus";
     private static final String TABLE_NAME = "users";
 
@@ -21,7 +21,7 @@ public class MyContentProvider extends ContentProvider {
 
     private static UriMatcher sUriMatcher;
 
-    private MyDBHElper mDbHelper;
+    private UsersDataBase mDbHelper;
 
     static {
         sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -30,7 +30,8 @@ public class MyContentProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        mDbHelper = new MyDBHElper(getContext());
+        mDbHelper = new UsersDataBase(getContext());
+
         return true;
     }
 
@@ -40,7 +41,7 @@ public class MyContentProvider extends ContentProvider {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         switch (sUriMatcher.match(uri)) {
             case ADDRESSES:
-                c = db.query(MyDBHElper.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
+                c = db.query(UsersDataBase.TABLE_NAME, projection, selection, selectionArgs, null, null, sortOrder);
                 break;
         }
         c.setNotificationUri(getContext().getContentResolver(), uri);
@@ -59,7 +60,7 @@ public class MyContentProvider extends ContentProvider {
         Uri resultUri = null;
         switch (sUriMatcher.match(uri)) {
             case ADDRESSES:
-                final long addressId = db.insertWithOnConflict(MyDBHElper.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+                final long addressId = db.insertWithOnConflict(UsersDataBase.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
                 resultUri = ContentUris.withAppendedId(uri, addressId);
                 break;
         }
@@ -72,7 +73,7 @@ public class MyContentProvider extends ContentProvider {
         String tablename = null;
         switch (sUriMatcher.match(uri)) {
             case ADDRESSES:
-                tablename = MyDBHElper.TABLE_NAME;
+                tablename = UsersDataBase.TABLE_NAME;
                 break;
         }
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
@@ -100,7 +101,7 @@ public class MyContentProvider extends ContentProvider {
 
         switch (sUriMatcher.match(uri)) {
             case ADDRESSES:
-                deleted = db.delete(MyDBHElper.TABLE_NAME, selection, selectionArgs);
+                deleted = db.delete(UsersDataBase.TABLE_NAME, selection, selectionArgs);
                 break;
             default:
                 deleted = 0;
@@ -118,7 +119,7 @@ public class MyContentProvider extends ContentProvider {
 
         switch (sUriMatcher.match(uri)) {
             case ADDRESSES:
-                updated = db.updateWithOnConflict(MyDBHElper.TABLE_NAME, values, selection, selectionArgs, SQLiteDatabase.CONFLICT_REPLACE);
+                updated = db.updateWithOnConflict(UsersDataBase.TABLE_NAME, values, selection, selectionArgs, SQLiteDatabase.CONFLICT_REPLACE);
                 break;
             default:
                 updated = 0;

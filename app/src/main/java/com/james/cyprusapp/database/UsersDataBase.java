@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 /**
  * Created by fappsilya on 13.10.15.
  */
-public class MyDBHElper extends SQLiteOpenHelper {
+public class UsersDataBase extends SQLiteOpenHelper {
     private static final String DB_NAME = "users_db";
     private static final int DB_VERSION = 1;
 
@@ -29,7 +29,7 @@ public class MyDBHElper extends SQLiteOpenHelper {
             + COLUMN_PHOTO + " TEXT"
             + " );";
 
-    public MyDBHElper(Context context) {
+    public UsersDataBase(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
 

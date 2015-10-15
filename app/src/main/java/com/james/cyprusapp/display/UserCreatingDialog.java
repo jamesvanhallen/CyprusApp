@@ -20,7 +20,7 @@ import com.james.cyprusapp.R;
 /**
  * Created by james on 15.10.15.
  */
-public class MyDialog extends DialogFragment {
+public class UserCreatingDialog extends DialogFragment {
 
     private UserCreateFragment frag;
 
@@ -35,6 +35,7 @@ public class MyDialog extends DialogFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         frag = new UserCreateFragment();
+        frag.setTargetFragment(this, 123);
         getChildFragmentManager().beginTransaction().replace(R.id.container3, frag).commit();
     }
 
@@ -60,8 +61,8 @@ public class MyDialog extends DialogFragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Log.wtf("Диалог", "onActivityRes");
+       // super.onActivityResult(requestCode, resultCode, data);
+        Log.wtf("СЩВУК", "Request act " + requestCode);
         frag.onActivityResult(requestCode, resultCode, data);
     }
 }

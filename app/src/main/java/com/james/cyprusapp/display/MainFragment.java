@@ -38,14 +38,12 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     ListView mLv;
     private UsersAdapter adapter;
     private User mUser;
-    private LayoutInflater mInflater;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_main, container, false);
         ButterKnife.bind(this, v);
-        mInflater = inflater;
 
         mLv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -78,11 +76,10 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @OnClick(R.id.fabButton)
     void onFabButtonClick(){
-        //DialogFragment fragment = new DialogFragment();
         FrameLayout container2 = (FrameLayout) getActivity().findViewById(R.id.container2);
         if(container2!=null){
             MyDialog dialog = new MyDialog();
-            dialog.show(getActivity().getSupportFragmentManager(), " dfd");
+            dialog.show(getActivity().getSupportFragmentManager(), MainActivity.DIALOG_ALERT);
         } else {
             ((MainActivity)getActivity()).changeFragment(new UserCreateFragment(), true, R.id.container);
 

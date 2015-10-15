@@ -194,6 +194,7 @@ public class UserCreateFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "onActivityRes");
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == REQUEST_CAMERA) {
                 Uri selectedUri = data.getData();
@@ -232,6 +233,7 @@ public class UserCreateFragment extends Fragment {
     }
 
     public static String getImagePath(Uri uri, Context context){
+        Log.d(TAG, "getImagePath");
         String[] proj = { MediaStore.Images.Media.DATA };
         CursorLoader loader = new CursorLoader(context, uri, proj, null, null, null);
         Cursor cursor = loader.loadInBackground();

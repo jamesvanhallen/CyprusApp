@@ -1,10 +1,12 @@
 package com.james.cyprusapp.display;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -31,6 +33,7 @@ public class MainActivity extends AppCompatActivity{
     @Bind(R.id.toolbar)
     Toolbar toolbar;
     private User user;
+    public static final String DIALOG_ALERT = "DIALOG";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +43,6 @@ public class MainActivity extends AppCompatActivity{
         if(savedInstanceState!=null){
             user = savedInstanceState.getParcelable("user");
         }
-        //toolbar.setNavigationIcon(ContextCompat.getDrawable(this, R.drawable.back_arrow));
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -57,14 +59,19 @@ public class MainActivity extends AppCompatActivity{
         });
 
         FrameLayout container2 = (FrameLayout) findViewById(R.id.container2);
-        if(container2!=null){
-            if(savedInstanceState!=null&&savedInstanceState.getParcelable("user")!=null){
-                UserCreateFragment fragment = new UserCreateFragment();
-                Bundle b = new Bundle();
-                b.putParcelable("user", savedInstanceState.getParcelable("user"));
-                fragment.setArguments(b);
-                changeFragment(fragment, false, R.id.container2);
+        if(savedInstanceState!=null&&savedInstanceState.getParcelable("user")!=null){
+            UserCreateFragment fragment = new UserCreateFragment();
+            Bundle b = new Bundle();
+            b.putParcelable("user", savedInstanceState.getParcelable("user"));
+            fragment.setArguments(b);
+
+            if(container2==null){
+                changeFragment(fragment, false, R.id.container);
             } else {
+                changeFragment(fragment, false, R.id.container2);
+            }
+        } else {
+            if(container2!=null){
                 changeFragment(new EmptyFragment(), false, R.id.container2);
             }
         }
@@ -159,4 +166,13 @@ public class MainActivity extends AppCompatActivity{
 
 
 
+    //    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        Log.wtf("Активити ", "Request " + requestCode);
+//        Fragment dialog = getSupportFragmentManager().findFragmentByTag(DIALOG_ALERT);
+//        if(dialog!=null){
+//            dialog.onActivityResult(requestCode, resultCode, data);
+//        }
+//    }
 }

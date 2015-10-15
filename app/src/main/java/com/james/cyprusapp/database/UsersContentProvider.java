@@ -7,20 +7,16 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 
-/**
- * Created by fappsilya on 13.10.15.
- */
+
 public class UsersContentProvider extends ContentProvider {
+
     private static final String AUTHORITY = "com.james.cyprus";
     private static final String TABLE_NAME = "users";
-
     public static final Uri CONTENT_ADDRESS_URI = Uri.parse("content://" + AUTHORITY + "/" + TABLE_NAME);
-
     private static final int ADDRESSES = 1;
-
     private static UriMatcher sUriMatcher;
-
     private UsersDataBase mDbHelper;
 
     static {
@@ -36,7 +32,7 @@ public class UsersContentProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor c = null;
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         switch (sUriMatcher.match(uri)) {
@@ -50,12 +46,12 @@ public class UsersContentProvider extends ContentProvider {
     }
 
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         return null;
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
+    public Uri insert(@NonNull Uri uri, ContentValues values) {
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
         Uri resultUri = null;
         switch (sUriMatcher.match(uri)) {
@@ -65,11 +61,12 @@ public class UsersContentProvider extends ContentProvider {
                 break;
         }
         getContext().getContentResolver().notifyChange(uri, null);
+
         return resultUri;
     }
 
     @Override
-    public int bulkInsert(Uri uri, ContentValues[] values) {
+    public int bulkInsert(@NonNull Uri uri, ContentValues[] values) {
         String tablename = null;
         switch (sUriMatcher.match(uri)) {
             case ADDRESSES:
@@ -95,7 +92,7 @@ public class UsersContentProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
         int deleted;
 
@@ -113,7 +110,7 @@ public class UsersContentProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(@NonNull Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
         int updated;
 

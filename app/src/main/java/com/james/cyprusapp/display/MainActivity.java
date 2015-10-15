@@ -1,22 +1,26 @@
 package com.james.cyprusapp.display;
 
-import android.content.Intent;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
+import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.CursorLoader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
 import android.widget.FrameLayout;
-
 import com.james.cyprusapp.R;
+import com.james.cyprusapp.database.UsersContentProvider;
+import com.james.cyprusapp.database.UsersDataBase;
 import com.james.cyprusapp.pojo.User;
 
 import java.io.IOException;
@@ -25,15 +29,16 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import rx.Observable;
 
-/**
- * Created by fappsilya on 23.07.15.
- */
+
 public class MainActivity extends AppCompatActivity{
 
     @Bind(R.id.toolbar)
     Toolbar toolbar;
     private User user;
     public static final String DIALOG_ALERT = "DIALOG";
+    public static final String TAG = "MainActivity";
+    public static  final int SELECT_FILE = 112;
+    public static  final int REQUEST_CAMERA = 113;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,17 +52,18 @@ public class MainActivity extends AppCompatActivity{
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-                    getSupportFragmentManager().popBackStack();
-                } else {
-                    finish();
-                }
+        toolbar.setNavigationOnClickListener(v -> {
+            if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                getSupportFragmentManager().popBackStack();
+            } else {
+                finish();
             }
         });
 
+        initView(savedInstanceState);
+    }
+
+    private void initView(Bundle savedInstanceState) {
         FrameLayout container2 = (FrameLayout) findViewById(R.id.container2);
         if(savedInstanceState!=null&&savedInstanceState.getParcelable("user")!=null){
             UserCreateFragment fragment = new UserCreateFragment();
@@ -95,6 +101,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
     public Observable<Bitmap> getBitmap(String icon) {
+
         return Observable.create(subscriber -> {
             subscriber.onNext(createBitmap(icon));
             subscriber.onCompleted();
@@ -114,6 +121,7 @@ public class MainActivity extends AppCompatActivity{
         options.inSampleSize = scale;
         options.inJustDecodeBounds = false;
         bm = rotateBitmap(BitmapFactory.decodeFile(imagePath, options), imagePath);
+
         return bm;
     }
 
@@ -128,27 +136,24 @@ public class MainActivity extends AppCompatActivity{
                     matrix.postRotate(90);
                     newBitmap = Bitmap.createBitmap(newBitmap, 0, 0, newBitmap.getWidth(),
                             newBitmap.getHeight(), matrix, true);
-                    Log.e("TAG", "90");
                     break;
                 case ExifInterface.ORIENTATION_ROTATE_180:
                     matrix.postRotate(180);
                     newBitmap = Bitmap.createBitmap(newBitmap, 0, 0, newBitmap.getWidth(),
                             newBitmap.getHeight(), matrix, true);
-                    Log.e("TAG", "180");
                     break;
                 case ExifInterface.ORIENTATION_ROTATE_270:
                     matrix.postRotate(270);
                     newBitmap = Bitmap.createBitmap(newBitmap, 0, 0, newBitmap.getWidth(),
                             newBitmap.getHeight(), matrix, true);
-                    Log.e("TAG", "270");
                     break;
             }
         } catch (IOException e) {
-            Log.e("TAG", e.getMessage());
+            Log.e(TAG, e.getMessage());
         }
+
         return newBitmap;
     }
-
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -165,14 +170,31 @@ public class MainActivity extends AppCompatActivity{
     }
 
 
+    public void saveInDB(User user) {
+        ContentValues cv = new ContentValues();
+        if(user.getId() != -1){
+            cv.put(UsersDataBase.COLUMN_ID, user.getId());
+        }
+        cv.put(UsersDataBase.COLUMN_NAME, user.getName());
+        cv.put(UsersDataBase.COLUMN_AGE, user.getAge());
+        cv.put(UsersDataBase.COLUMN_PHOTO, user.getPhoto());
+        getContentResolver().insert(UsersContentProvider.CONTENT_ADDRESS_URI, cv);
+    }
 
-    //    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//        Log.wtf("Активити ", "Request " + requestCode);
-//        Fragment dialog = getSupportFragmentManager().findFragmentByTag(DIALOG_ALERT);
-//        if(dialog!=null){
-//            dialog.onActivityResult(requestCode, resultCode, data);
-//        }
-//    }
+    public void removeFromDB(long id){
+        String[] data = {String.valueOf(id)};
+        getContentResolver().delete(UsersContentProvider.CONTENT_ADDRESS_URI, "_id=?", data);
+    }
+
+    public String getImagePath(Uri uri, Context context){
+        String[] proj = { MediaStore.Images.Media.DATA };
+        CursorLoader loader = new CursorLoader(context, uri, proj, null, null, null);
+        Cursor cursor = loader.loadInBackground();
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        String result = cursor.getString(column_index);
+        cursor.close();
+        return result;
+    }
+
 }

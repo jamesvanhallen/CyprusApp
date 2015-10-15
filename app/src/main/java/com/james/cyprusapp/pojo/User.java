@@ -3,9 +3,7 @@ package com.james.cyprusapp.pojo;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/**
- * Created by fappsilya on 13.10.15.
- */
+
 public class User implements Parcelable {
     private long id;
     private String name;
@@ -78,6 +76,5 @@ public class User implements Parcelable {
         dest.writeString(name);
         dest.writeString(photo);
         dest.writeInt(age);
-
     }
 }

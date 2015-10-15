@@ -39,7 +39,7 @@ android {
 }
 
 retrolambda {
-    jdk "/Library/Java/JavaVirtualMachines/jdk1.8.0_40.jdk/Contents/Home"
+    jdk "/usr/lib/jvm/java-8-oracle"
     javaVersion JavaVersion.VERSION_1_7
 }
 
@@ -51,5 +51,4 @@ dependencies {
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'de.hdodenhof:circleimageview:2.0.0'
     compile 'io.reactivex:rxandroid:1.0.1'
-
 }

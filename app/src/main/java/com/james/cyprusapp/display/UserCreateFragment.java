@@ -1,21 +1,15 @@
 package com.james.cyprusapp.display;
 
 import android.app.Activity;
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.CursorLoader;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,17 +17,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
-
-import com.james.cyprusapp.database.MyContentProvider;
-import com.james.cyprusapp.database.MyDBHElper;
 import com.james.cyprusapp.R;
 import com.james.cyprusapp.pojo.User;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -43,9 +32,7 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-/**
- * Created by james on 13.10.15.
- */
+
 public class UserCreateFragment extends Fragment {
 
     @Bind(R.id.name)
@@ -60,8 +47,6 @@ public class UserCreateFragment extends Fragment {
     CircleImageView mProfilePhoto;
 
     private long id = -1;
-    public static  final int SELECT_FILE = 112;
-    public static  final int REQUEST_CAMERA = 113;
     private Subscription mSubscription;
     private String imagePath = "";
     private static final String TAG = "UserCreateFragment";
@@ -72,21 +57,27 @@ public class UserCreateFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_user_create, container, false);
         ButterKnife.bind(this, v);
+
         if(getArguments()!=null){
-            User user = getArguments().getParcelable("user");
-            mName.getEditText().setText(user.getName());
-            mAge.getEditText().setText(user.getAge() + "");
-            id = user.getId();
-            imagePath = user.getPhoto();
-            mCreateBtn.setText("Изменить");
-            mDeleteBtn.setVisibility(View.VISIBLE);
-            ((MainActivity)getActivity()).getBitmap(imagePath)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(mProfilePhoto::setImageBitmap);
+            User mUser = getArguments().getParcelable("user");
+            initViews(mUser);
         }
 
         return v;
+    }
+
+    private void initViews(User user) {
+
+        mName.getEditText().setText(user.getName());
+        mAge.getEditText().setText(user.getAge() + "");
+        id = user.getId();
+        imagePath = user.getPhoto();
+        mCreateBtn.setText(R.string.Update);
+        mDeleteBtn.setVisibility(View.VISIBLE);
+        ((MainActivity)getActivity()).getBitmap(imagePath)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(mProfilePhoto::setImageBitmap);
     }
 
     @OnClick(R.id.create_btn)
@@ -116,14 +107,14 @@ public class UserCreateFragment extends Fragment {
             Observable<User> mCreateObservable = Observable.just(user);
             mSubscription = mCreateObservable.subscribeOn(Schedulers.io())
                        .observeOn(AndroidSchedulers.mainThread())
-                       .subscribe(UserCreateFragment.this::saveInDB,
+                       .subscribe(((MainActivity)getActivity())::saveInDB,
                                Throwable::printStackTrace,
                                UserCreateFragment.this::finishRedact);
 
         } else {
             AlertDialog.Builder alb = new AlertDialog.Builder(getActivity());
             alb.setMessage(error)
-                .setPositiveButton("Ок", null)
+                .setPositiveButton(getResources().getString(R.string.ok), null)
                 .create()
                 .show();
         }
@@ -134,26 +125,9 @@ public class UserCreateFragment extends Fragment {
         Observable<Long> mDeleteObservable = Observable.just(id);
         mSubscription = mDeleteObservable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(UserCreateFragment.this::removeFromDB,
+                .subscribe(((MainActivity)getActivity())::removeFromDB,
                         Throwable::printStackTrace,
                         UserCreateFragment.this::finishRedact);
-    }
-
-
-    private void saveInDB(User user) {
-        ContentValues cv = new ContentValues();
-        if(user.getId() != -1){
-            cv.put(MyDBHElper.COLUMN_ID, user.getId());
-        }
-        cv.put(MyDBHElper.COLUMN_NAME, user.getName());
-        cv.put(MyDBHElper.COLUMN_AGE, user.getAge());
-        cv.put(MyDBHElper.COLUMN_PHOTO, user.getPhoto());
-        getActivity().getContentResolver().insert(MyContentProvider.CONTENT_ADDRESS_URI, cv);
-    }
-
-    private void removeFromDB(long id){
-        String[] data = {String.valueOf(id)};
-        getActivity().getContentResolver().delete(MyContentProvider.CONTENT_ADDRESS_URI, "_id=?", data);
     }
 
     public void finishRedact(){
@@ -169,22 +143,25 @@ public class UserCreateFragment extends Fragment {
 
     @OnClick(R.id.profile_image)
     void selectImage() {
-        final CharSequence[] items = { "Камера", "Галерея", "Назад" };
+        final CharSequence[] items = {
+                getResources().getString(R.string.camera),
+                getResources().getString(R.string.gallery),
+                getResources().getString(R.string.on_back) };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setItems(items, (dialog, item) -> {
-            if ("Камера".equals(items[item])) {
+            if (getResources().getString(R.string.camera).equals(items[item])) {
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(intent, REQUEST_CAMERA);
-            } else if ("Галерея".equals(items[item])) {
+                startActivityForResult(intent, MainActivity.REQUEST_CAMERA);
+            } else if (getResources().getString(R.string.gallery).equals(items[item])) {
                 Intent intent = new Intent(
                         Intent.ACTION_PICK,
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 intent.setType("image/*");
                 startActivityForResult(
                         Intent.createChooser(intent, "Select File"),
-                        SELECT_FILE);
-            } else if ("Назад".equals(items[item])) {
+                        MainActivity.SELECT_FILE);
+            } else if (getResources().getString(R.string.on_back).equals(items[item])) {
                 dialog.dismiss();
             }
         });
@@ -194,13 +171,12 @@ public class UserCreateFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.d(TAG, "onActivityRes");
         if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == REQUEST_CAMERA) {
+            if (requestCode == MainActivity.REQUEST_CAMERA) {
                 Uri selectedUri = data.getData();
                 if(selectedUri != null){
                     Log.d(TAG, "uri != null");
-                    imagePath = getImagePath(data.getData(), getContext());
+                    imagePath = ((MainActivity)getActivity()).getImagePath(data.getData(), getContext());
                 }
                 else {
                     Log.d(TAG, "uri == null");
@@ -221,9 +197,9 @@ public class UserCreateFragment extends Fragment {
                     imagePath = destination.getPath();
                 }
 
-            } else if (requestCode == SELECT_FILE) {
+            } else if (requestCode == MainActivity.SELECT_FILE) {
                 Uri selectedImageUri = data.getData();
-                imagePath = getImagePath(selectedImageUri, getContext());
+                imagePath = ((MainActivity)getActivity()).getImagePath(selectedImageUri, getContext());
             }
             ((MainActivity)getActivity()).getBitmap(imagePath)
                     .subscribeOn(Schedulers.io())
@@ -232,16 +208,12 @@ public class UserCreateFragment extends Fragment {
         }
     }
 
-    public static String getImagePath(Uri uri, Context context){
-        Log.d(TAG, "getImagePath");
-        String[] proj = { MediaStore.Images.Media.DATA };
-        CursorLoader loader = new CursorLoader(context, uri, proj, null, null, null);
-        Cursor cursor = loader.loadInBackground();
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        String result = cursor.getString(column_index);
-        cursor.close();
-        return result;
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putString("name", mName.getEditText().getText().toString());
+        outState.putInt("age", Integer.parseInt(mAge.getEditText().getText().toString()));
+        outState.putString("photo", mName.getEditText().getText().toString());
+        super.onSaveInstanceState(outState);
     }
 
     @Override

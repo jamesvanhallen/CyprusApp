@@ -6,5 +6,5 @@
 .idea
 gradlew
 gradlew.bat
+gradle
 CyprusApp.iml
-SyprusApp.iml

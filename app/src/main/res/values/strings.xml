@@ -7,4 +7,9 @@
     <string name="input_name">Введите имя</string>
     <string name="delete_btn">Удалить</string>
     <string name="no_photo">Фотография не выбрана</string>
+    <string name="Update">Изменить</string>
+    <string name="ok">Ок</string>
+    <string name="camera">Камера</string>
+    <string name="gallery">Галерея</string>
+    <string name="on_back">Назад</string>
 </resources>

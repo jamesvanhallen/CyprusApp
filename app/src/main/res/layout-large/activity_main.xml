@@ -25,6 +25,11 @@
             android:layout_height="match_parent"
             android:id="@+id/container"/>
 
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/gray"/>
+
         <FrameLayout
             android:layout_width="0dp"
             android:layout_weight="1"

@@ -20,7 +20,7 @@
         </activity>
 
         <provider
-            android:name=".database.MyContentProvider"
+            android:name=".database.UsersContentProvider"
             android:authorities="com.james.cyprus"
             android:exported="false"
             android:syncable="true"/>
